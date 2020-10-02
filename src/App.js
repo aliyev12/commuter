@@ -1,9 +1,9 @@
 import React from "react";
-import { Home } from "./components/Home";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { EditList } from "./components/EditList";
+import { Add } from "./components/Add";
+import { Home } from "./components/Home";
 import { Layout } from "./components/Layout";
-
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 function App() {
   return (
@@ -12,6 +12,9 @@ function App() {
         <Switch>
           <Route path="/edit">
             <EditList />
+          </Route>
+          <Route path="/add">
+            <Add />
           </Route>
           <Route path="/">
             <Home />
