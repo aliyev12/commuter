@@ -15,7 +15,7 @@ const useStyles = makeStyles({
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-export function Search() {
+export function Search({ label = "Bus number" }) {
   const classes = useStyles();
 
   return (
@@ -25,7 +25,7 @@ export function Search() {
         options={top100Films}
         getOptionLabel={(option) => option.title}
         renderInput={(params) => (
-          <TextField {...params} label="Combo box" variant="outlined" />
+          <TextField {...params} label={label} variant="outlined" />
         )}
       />
     </div>
