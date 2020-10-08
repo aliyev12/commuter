@@ -17,9 +17,10 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import { Title } from "./Title";
-
+import { socket } from "./Layout";
 import { SelectChoice } from "./SelectChoice";
 import { Search } from "./Search";
+import { NewBusInfo } from "./NewBusInfo";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,6 +58,11 @@ const defaultInfo = {
 export function Add() {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
+
+  const [routesInfo, set__routesInfo] = React.useState([]);
+  const [directionsInfo, set__directionsInfo] = React.useState([]);
+
+  const [routeID, set__routeID] = React.useState();
   const [searchType, set__searchType] = React.useState("search");
   // const [newBusInfo, set__newBusInfo] = React.useState({ ...defaultInfo });
   const [newBusInfo, set__newBusInfo] = React.useState({
@@ -65,12 +71,25 @@ export function Add() {
     stop: "Gainsborough Dr + Eastlake Dr + Bet # 5317",
   });
 
+  React.useEffect(() => {
+    socket.emit("getRoutes", (routes) => {
+      console.log("routes = ", routes);
+      set__routesInfo(routes);
+    });
+  }, []);
+
   const handlesearchTypeChange = (event) => {
     set__searchType(event.target.value);
   };
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const handleNext = (step) => {
+    if (step === "after-route" && routeID) {
+      socket.emit("getDirections", routeID, (directions) => {
+        console.log("directions = ", directions);
+        set__directionsInfo(directions);
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      });
+    }
   };
 
   const handleBack = () => {
@@ -85,71 +104,15 @@ export function Add() {
     // do some
   };
 
+  const handleRouteChange = (_, choice) => {
+    set__routeID(choice.value);
+  };
+
   return (
     <Container fixed>
       <div className={classes.root}>
-        {newBusInfo.bus && (
-          <>
-            <Title text="New Bus Info" />
-            <Paper className={classes.busInfoPaper}>
-              <List>
-                <ListItem>
-                  <ListItemIcon>
-                    <DirectionsBusIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <div>
-                        <strong>Bus:</strong>
-                        <span className={classes.infoListItemName}>17H</span>
-                      </div>
-                    }
-                  />
-                </ListItem>
-                {newBusInfo.direction && (
-                  <>
-                    <Divider variant="inset" component="li" />
-                    <ListItem>
-                      <ListItemIcon>
-                        <DirectionsIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <div>
-                            <strong>Direction:</strong>
-                            <span className={classes.infoListItemName}>
-                              North
-                            </span>
-                          </div>
-                        }
-                      />
-                    </ListItem>
-                  </>
-                )}
-                {newBusInfo.stop && (
-                  <>
-                    <Divider variant="inset" component="li" />
-                    <ListItem>
-                      <ListItemIcon>
-                        <AssistantPhotoIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <div>
-                            <strong>Stop:</strong>
-                            <span className={classes.infoListItemName}>
-                              Gainsborough Dr + Eastlake Dr + Bet # 5317
-                            </span>
-                          </div>
-                        }
-                      />
-                    </ListItem>
-                  </>
-                )}
-              </List>
-            </Paper>
-          </>
-        )}
+        {newBusInfo.bus && <NewBusInfo newBusInfo={newBusInfo} />}
+
         <Title text="Find a Bus" />
         <Paper className={classes.stepperPaper}>
           <Stepper activeStep={activeStep} orientation="vertical">
@@ -157,7 +120,16 @@ export function Add() {
               <StepLabel>Select bus number</StepLabel>
               <StepContent>
                 <Typography>
-                  <Search label="Bus number" />
+                  {/* routeID: "16C", routeName */}
+                  <Search
+                    label="Bus number"
+                    options={routesInfo.map((x) => ({
+                      name: x.routeName,
+                      value: x.routeID,
+                    }))}
+                    value={routeID}
+                    handleChange={handleRouteChange}
+                  />
                 </Typography>
                 <div className={classes.actionsContainer}>
                   <div>
@@ -171,7 +143,8 @@ export function Add() {
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={handleNext}
+                      disabled={!routeID}
+                      onClick={() => handleNext("after-route")}
                       className={classes.button}
                     >
                       {activeStep === 2 ? "Finish" : "Next"}
@@ -256,11 +229,4 @@ export function Add() {
       </div>
     </Container>
   );
-}
-
-{
-  /* <SelectChoice
-searchType={searchType}
-handlesearchTypeChange={handlesearchTypeChange}
-/> */
 }

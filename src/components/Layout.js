@@ -11,7 +11,9 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import EditIcon from "@material-ui/icons/Edit";
 import HomeIcon from "@material-ui/icons/Home";
+import AddIcon from "@material-ui/icons/Add";
 import MenuIcon from "@material-ui/icons/Menu";
+import socketIOClient from "socket.io-client";
 import clsx from "clsx";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -31,7 +33,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function Layout({ children }) {
+var socket;
+
+function Layout({ children }) {
   const classes = useStyles();
   const history = useHistory();
 
@@ -62,9 +66,17 @@ export function Layout({ children }) {
           </ListItemIcon>
           <ListItemText primary={"Edit List"} />
         </ListItem>
+        <ListItem button onClick={() => history.push("/add")}>
+          <ListItemIcon>
+            <AddIcon />
+          </ListItemIcon>
+          <ListItemText primary={"Add new item"} />
+        </ListItem>
       </List>
     </div>
   );
+
+  socket = socketIOClient(process.env.REACT_APP_SOCKETIO_ENDPOINT);
 
   return (
     <div className={classes.root}>
@@ -92,3 +104,5 @@ export function Layout({ children }) {
     </div>
   );
 }
+
+export { Layout, socket };

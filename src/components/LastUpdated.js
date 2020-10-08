@@ -4,6 +4,7 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import SyncIcon from "@material-ui/icons/Sync";
+import { socket } from "./Layout";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,6 +31,20 @@ const useStyles = makeStyles((theme) => ({
 export function LastUpdated() {
   const classes = useStyles();
 
+  React.useEffect(() => {
+    socket.on("message", (message) => {
+      console.log("received new message from server = ", message);
+    });
+
+    return () => {
+      socket.off("message");
+    };
+  }, []);
+
+  const handleUpdate = () => {
+    socket.emit("message", "updating...");
+  };
+
   return (
     <div className={classes.root}>
       <Paper elevation={3} className={classes.paper}>
@@ -41,6 +56,7 @@ export function LastUpdated() {
           color="primary"
           aria-label="add to shopping cart"
           className={classes.updateBtn}
+          onClick={handleUpdate}
         >
           <SyncIcon />
         </IconButton>
