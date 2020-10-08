@@ -1,3 +1,5 @@
+import React from "react";
+import { useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
@@ -8,13 +10,11 @@ import Stepper from "@material-ui/core/Stepper";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import RotateLeftIcon from "@material-ui/icons/RotateLeft";
-import { red } from "@material-ui/core/colors";
-
-import React from "react";
 import { socket } from "./Layout";
 import { NewBusInfo } from "./NewBusInfo";
 import { Search } from "./Search";
 import { Title } from "./Title";
+import { RoutesContext } from "../contexts/RoutesContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,18 +48,23 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const defaultInfo = {
-  bus: "",
-  direction: "",
-  stop: "",
+  routeID: "",
+  routeName: "",
+  directionName: "",
+  directionNum: "",
+  tripHeadsign: "",
+  stopID: "",
+  stopName: "",
+  stopRoutes: [],
 };
 
 export function Add() {
   const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
+  const history = useHistory();
+  const { routesState, dispatch } = React.useContext(RoutesContext);
+  const { routesInfo, directionsInfo, stopsInfo } = routesState;
 
-  const [routesInfo, set__routesInfo] = React.useState([]);
-  const [directionsInfo, set__directionsInfo] = React.useState([]);
-  const [stopsInfo, set__stopsInfo] = React.useState([]);
+  const [activeStep, setActiveStep] = React.useState(0);
 
   const [routeID, set__routeID] = React.useState(undefined);
   const [routeInputValue, set__routeInputValue] = React.useState("");
@@ -70,27 +75,29 @@ export function Add() {
   const [newBusInfo, set__newBusInfo] = React.useState({ ...defaultInfo });
 
   React.useEffect(() => {
-    socket.emit("getRoutes", (routes) => {
-      console.log("routes = ", routes);
-      set__routesInfo(routes);
+    socket.emit("getRoutes", (_routes) => {
+      console.log("routes = ", _routes);
+      dispatch({ type: "ADD_ROUTES_INFO", payload: { routesInfo: _routes } });
     });
   }, []);
 
   const handleNext = (step) => {
     if (step === "after-route" && routeID) {
-      socket.emit("getDirections", routeID, (directions) => {
-        console.log("directions = ", directions);
-        set__directionsInfo(directions);
+      socket.emit("getDirections", routeID, (_directions) => {
+        console.log("_directions = ", _directions);
+        dispatch({
+          type: "ADD_DIRECTIONS_INFO",
+          payload: { directionsInfo: _directions },
+        });
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
       });
     } else if (step === "after-direction" && directionNum) {
       socket.emit("getStops", routeID, directionNum, (_stops) => {
         console.log("_stops = ", _stops);
-        set__stopsInfo(_stops);
+        dispatch({ type: "ADD_STOPS_INFO", payload: { stopsInfo: _stops } });
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
       });
     } else if (step === "after-stop" && stopID) {
-      console.log("success!!");
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
@@ -105,20 +112,25 @@ export function Add() {
 
   const handleAdd = () => {
     // do some
+    dispatch({ type: "ADD_NEW_BUS_TO_TRACK", payload: { newBusInfo } });
+    handleReset();
+    history.push("/");
   };
 
   const handleRouteChange = (_, choice) => {
     if (choice && choice.value && choice.name) {
+      const foundRoute = routesInfo.find((x) => x.routeID === choice.value);
       set__routeID(choice.value);
       set__newBusInfo({
         ...newBusInfo,
-        bus: choice.value,
+        ...foundRoute,
       });
     } else {
       set__routeID(undefined);
       set__newBusInfo({
         ...newBusInfo,
-        bus: "",
+        routeID: "",
+        routeName: "",
       });
     }
   };
@@ -129,32 +141,40 @@ export function Add() {
 
   const handleDirectionChange = (_, choice) => {
     if (choice && choice.value && choice.name) {
+      const foundDirection = directionsInfo.find(
+        (x) => x.directionNum === choice.value
+      );
       set__directionNum(choice.value);
       set__newBusInfo({
         ...newBusInfo,
-        direction: choice.name,
+        ...foundDirection,
       });
     } else {
       set__directionNum(undefined);
       set__newBusInfo({
         ...newBusInfo,
-        direction: "",
+        directionName: "",
+        directionNum: "",
+        tripHeadsign: "",
       });
     }
   };
 
   const handleStopChange = (_, choice) => {
     if (choice && choice.value && choice.name) {
+      const foundStop = stopsInfo.find((x) => x.stopID === choice.value);
       set__stopID(choice.value);
       set__newBusInfo({
         ...newBusInfo,
-        stop: choice.name,
+        ...foundStop,
       });
     } else {
       set__stopID(undefined);
       set__newBusInfo({
         ...newBusInfo,
-        stop: "",
+        stopID: "",
+        stopName: "",
+        stopRoutes: [],
       });
     }
   };
@@ -162,10 +182,17 @@ export function Add() {
   return (
     <Container fixed>
       <div className={classes.root}>
-        {newBusInfo.bus && <NewBusInfo newBusInfo={newBusInfo} />}
+        <NewBusInfo
+          newBusInfo={{
+            bus: newBusInfo.routeID,
+            direction: newBusInfo.directionName
+              ? `${newBusInfo.directionName} → ${newBusInfo.tripHeadsign}`
+              : "",
+            stop: newBusInfo.stopName,
+          }}
+        />
 
         <Title text="Find a Bus" />
-
         <Paper className={classes.stepperPaper}>
           <Button
             onClick={handleReset}
@@ -181,17 +208,19 @@ export function Add() {
               <StepLabel>Select bus number</StepLabel>
               <StepContent>
                 <Typography>
-                  <Search
-                    label="Bus number"
-                    options={routesInfo.map((x) => ({
-                      name: x.routeName,
-                      value: x.routeID,
-                    }))}
-                    value={routeID}
-                    inputValue={routeInputValue}
-                    handleChange={handleRouteChange}
-                    handleInputChange={handleRouteInputChange}
-                  />
+                  {routesInfo ? (
+                    <Search
+                      label="Bus number"
+                      options={routesInfo.map((x) => ({
+                        name: x.routeName,
+                        value: x.routeID,
+                      }))}
+                      value={routeID}
+                      inputValue={routeInputValue}
+                      handleChange={handleRouteChange}
+                      handleInputChange={handleRouteInputChange}
+                    />
+                  ) : null}
                 </Typography>
                 <div className={classes.actionsContainer}>
                   <div>
@@ -213,15 +242,17 @@ export function Add() {
               <StepLabel>Select direction</StepLabel>
               <StepContent>
                 <Typography>
-                  <Search
-                    label="Bus direction"
-                    options={directionsInfo.map((x) => ({
-                      name: x.directionName,
-                      value: x.directionNum,
-                    }))}
-                    value={directionNum}
-                    handleChange={handleDirectionChange}
-                  />
+                  {directionsInfo ? (
+                    <Search
+                      label="Bus direction"
+                      options={directionsInfo.map((x) => ({
+                        name: x.directionName,
+                        value: x.directionNum,
+                      }))}
+                      value={directionNum}
+                      handleChange={handleDirectionChange}
+                    />
+                  ) : null}
                 </Typography>
                 <div className={classes.actionsContainer}>
                   <div>
@@ -242,15 +273,17 @@ export function Add() {
               <StepLabel>Select bus stop</StepLabel>
               <StepContent>
                 <Typography>
-                  <Search
-                    label="Bus stop"
-                    options={stopsInfo.map((x) => ({
-                      name: x.stopName,
-                      value: x.stopID,
-                    }))}
-                    value={stopID}
-                    handleChange={handleStopChange}
-                  />
+                  {stopsInfo ? (
+                    <Search
+                      label="Bus stop"
+                      options={stopsInfo.map((x) => ({
+                        name: x.stopName,
+                        value: x.stopID,
+                      }))}
+                      value={stopID}
+                      handleChange={handleStopChange}
+                    />
+                  ) : null}
                 </Typography>
                 <div className={classes.actionsContainer}>
                   <div>
