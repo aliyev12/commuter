@@ -37,7 +37,9 @@ export function NewBusInfo({ newBusInfo }) {
               primary={
                 <div>
                   <strong>Bus:</strong>
-                  <span className={classes.infoListItemName}>17H</span>
+                  <span className={classes.infoListItemName}>
+                    {newBusInfo.bus}
+                  </span>
                 </div>
               }
             />
@@ -53,7 +55,9 @@ export function NewBusInfo({ newBusInfo }) {
                   primary={
                     <div>
                       <strong>Direction:</strong>
-                      <span className={classes.infoListItemName}>North</span>
+                      <span className={classes.infoListItemName}>
+                        {newBusInfo.direction}
+                      </span>
                     </div>
                   }
                 />
@@ -72,7 +76,7 @@ export function NewBusInfo({ newBusInfo }) {
                     <div>
                       <strong>Stop:</strong>
                       <span className={classes.infoListItemName}>
-                        Gainsborough Dr + Eastlake Dr + Bet # 5317
+                        {newBusInfo.stop}
                       </span>
                     </div>
                   }
