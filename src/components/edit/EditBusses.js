@@ -1,57 +1,21 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { red } from "@material-ui/core/colors";
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import IconButton from "@material-ui/core/IconButton";
+import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
-import clsx from "clsx";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import NavigationIcon from "@material-ui/icons/Navigation";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
-import Button from "@material-ui/core/Button";
-import ButtonGroup from "@material-ui/core/ButtonGroup";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import AddIcon from "@material-ui/icons/Add";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import DeleteIcon from "@material-ui/icons/Delete";
+import clsx from "clsx";
 import { useHistory } from "react-router-dom";
-
-import Paper from "@material-ui/core/Paper";
-
-const useStyles = makeStyles({
-  root: {
-    marginTop: "2rem",
-  },
-  table: {
-    minWidth: 650,
-  },
-  deleteIconBtnCell: {
-    width: "6px",
-    padding: "0 3px",
-  },
-  moveRowBtnsCell: {
-    width: "6px",
-    padding: "0 3px",
-  },
-  deleteIconBtn: {
-    color: red.A400,
-    // padding: "3px",
-  },
-  moveBtn: {
-    padding: "5px",
-    minWidth: "20px",
-  },
-  arrow: {
-    fontSize: "1rem",
-  },
-  addNewBtn: {
-    marginTop: "2rem",
-  },
-});
+import { useStyles } from "./EditBusses.styles";
 
 function createData(bus, direction, stop) {
   return { bus, direction, stop };

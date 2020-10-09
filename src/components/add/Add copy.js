@@ -5,11 +5,11 @@ import Stepper from "@material-ui/core/Stepper";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import React from "react";
-import { socket } from "./Layout";
-import { NewBusInfo } from "./NewBusInfo";
-import { Search } from "./Search";
+import { socket } from "../global/Layout";
+import { NewBusInfo } from "../NewBusInfo";
+import { Search } from "../Search";
 import { Step } from "./Step";
-import { Title } from "./Title";
+import { Title } from "../Title";
 
 const useStyles = makeStyles((theme) => ({
   root: {

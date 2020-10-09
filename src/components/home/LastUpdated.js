@@ -4,7 +4,6 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import SyncIcon from "@material-ui/icons/Sync";
-import { socket } from "./Layout";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -12,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     marginTop: "1rem",
     "& > *": {
-      margin: theme.spacing(1),
+      // margin: theme.spacing(1),
       width: "100%",
       //   height: theme.spacing(16),
     },
@@ -28,30 +27,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function LastUpdated() {
+export function LastUpdated({ lastUpdatedOn, handleUpdate }) {
   const classes = useStyles();
-
-  React.useEffect(() => {
-    socket.on("message", (message) => {
-      console.log("received new message from server = ", message);
-    });
-
-    return () => {
-      socket.off("message");
-    };
-  }, []);
-
-  const handleUpdate = () => {
-    socket.emit("message", "updating...");
-  };
 
   return (
     <div className={classes.root}>
       <Paper elevation={3} className={classes.paper}>
-        {/* <Typography variant="h6" component="h1">
-              Repeat
-            </Typography> */}
-        <Typography>Last updated on 10/30 at 3:32 PM</Typography>
+        <Typography>
+          Last updated on {new Date(lastUpdatedOn).toLocaleDateString()} at{" "}
+          {new Date(lastUpdatedOn).toLocaleTimeString()}
+        </Typography>
         <IconButton
           color="primary"
           aria-label="add to shopping cart"

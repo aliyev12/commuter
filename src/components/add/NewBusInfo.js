@@ -1,3 +1,4 @@
+import React from "react";
 import Divider from "@material-ui/core/Divider";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -8,8 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import AssistantPhotoIcon from "@material-ui/icons/AssistantPhoto";
 import DirectionsIcon from "@material-ui/icons/Directions";
 import DirectionsBusIcon from "@material-ui/icons/DirectionsBus";
-import React from "react";
-import { Title } from "./Title";
+import { Title } from "../global/Title";
 
 const useStyles = makeStyles(() => ({
   busInfoPaper: {

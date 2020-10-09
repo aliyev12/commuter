@@ -1,11 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { EditList } from "./components/EditList";
-import { Add } from "./components/Add";
-import { Home } from "./components/Home";
-import { Layout } from "./components/Layout";
+import { EditList } from "./components/edit/EditList";
+import { Add } from "./components/add/Add";
+import { Home } from "./components/home/Home";
+import { Layout } from "./components/global/Layout";
+import { RoutesContext } from "./contexts/RoutesContext";
 
 function App() {
+  const { dispatch } = React.useContext(RoutesContext);
+
+  React.useEffect(() => {
+    dispatch({ type: "SYNC_BUSSES_TO_TRACK_FROM_LOCAL_STORAGE" });
+  }, []);
+
   return (
     <Router>
       <Layout>

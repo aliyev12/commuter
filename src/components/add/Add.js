@@ -1,5 +1,3 @@
-import React from "react";
-import { useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
@@ -7,45 +5,16 @@ import Step from "@material-ui/core/Step";
 import StepContent from "@material-ui/core/StepContent";
 import StepLabel from "@material-ui/core/StepLabel";
 import Stepper from "@material-ui/core/Stepper";
-import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import RotateLeftIcon from "@material-ui/icons/RotateLeft";
-import { socket } from "./Layout";
+import React from "react";
+import { useHistory } from "react-router-dom";
+import { RoutesContext } from "../../contexts/RoutesContext";
+import { socket } from "../global/Layout";
+import { Title } from "../global/Title";
 import { NewBusInfo } from "./NewBusInfo";
 import { Search } from "./Search";
-import { Title } from "./Title";
-import { RoutesContext } from "../contexts/RoutesContext";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    marginTop: "2rem",
-    marginBottom: "1rem",
-    width: "100%",
-  },
-  button: {
-    marginTop: theme.spacing(1),
-    marginRight: theme.spacing(1),
-  },
-  resetButton: {
-    marginTop: "24px",
-    marginLeft: "24px",
-  },
-  actionsContainer: {
-    marginBottom: theme.spacing(2),
-  },
-  resetContainer: {
-    padding: theme.spacing(3),
-  },
-  busInfoPaper: {
-    marginBottom: "2rem",
-  },
-  infoListItemName: {
-    marginLeft: "5px",
-  },
-  stepperPaper: {
-    marginBottom: "2rem",
-  },
-}));
+import { useStyles } from "./Add.styles";
 
 const defaultInfo = {
   routeID: "",
