@@ -16,66 +16,141 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import clsx from "clsx";
 import { useHistory } from "react-router-dom";
 import { useStyles } from "./EditBusses.styles";
-
-function createData(bus, direction, stop) {
-  return { bus, direction, stop };
-}
-
-const rows = [
-  createData("17H", "North", "Guinea Rd + Burke Rd"),
-  createData("17L", "North", "Gainsborough Dr + Eastlake Dr + Bet # 5317"),
-  createData("17K", "North", "Gainsborough Dr + Commonwealth Blvd"),
-];
+import { RoutesContext } from "../../contexts/RoutesContext";
+import { Title } from "../global/Title";
 
 export function EditBusses() {
   const classes = useStyles();
   const history = useHistory();
+  const { routesState, dispatch } = React.useContext(RoutesContext);
+  const { bussesToTrack } = routesState;
+
+  const [thCells, set__thCells] = React.useState([
+    {
+      name: "Bus",
+      class: "",
+      prop: "routeID",
+    },
+    {
+      name: "Direction",
+      class: "",
+      prop: "directionName",
+    },
+    {
+      name: "Trip Headsign",
+      class: classes.tripHeadsignCol,
+      prop: "tripHeadsign",
+    },
+    {
+      name: "Stop",
+      class: classes.stopCol,
+      prop: "stopName",
+    },
+    {
+      name: "Route Name",
+      class: classes.routeNameCol,
+      prop: "routeName",
+    },
+    {
+      name: "Stop Routes",
+      class: classes.stopRoutesCol,
+      prop: "stopRoutes",
+    },
+  ]);
+
+  if (!bussesToTrack) return null;
+
+  const handleMove = (index, direction) => {
+    const newBussesToTrack = [...bussesToTrack];
+    if (direction === "up") {
+      if (index >= 1) {
+        let temp = newBussesToTrack[index - 1];
+        newBussesToTrack[index - 1] = newBussesToTrack[index];
+        newBussesToTrack[index] = temp;
+      }
+    } else {
+      if (index <= newBussesToTrack.length - 2) {
+        let temp = newBussesToTrack[index + 1];
+        newBussesToTrack[index + 1] = newBussesToTrack[index];
+        newBussesToTrack[index] = temp;
+      }
+    }
+    dispatch({
+      type: "UPDATE_BUSSES_TO_TRACK",
+      payload: { bussesToTrack: newBussesToTrack },
+    });
+  };
+
+  const handleDelete = (id) => {
+    dispatch({
+      type: "DELETE_BUSS_TO_TRACK",
+      payload: { id },
+    });
+  };
+
+  const generateThs = () =>
+    thCells.map((th) => <TableCell className={th.class}>{th.name}</TableCell>);
+
+  const generateTds = (busToTrack) =>
+    thCells.map((th) => <TableCell>{busToTrack[th.prop]}</TableCell>);
 
   return (
     <div className={classes.root}>
+      <Title text="Edit busses to track" />
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
               <TableCell></TableCell>
-              <TableCell>Bus</TableCell>
-              <TableCell>Direction</TableCell>
-              <TableCell>Stop</TableCell>
+              {generateThs()}
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.bus}>
-                <TableCell className={classes.moveRowBtnsCell}>
-                  <ButtonGroup
-                    orientation="vertical"
-                    color="primary"
-                    variant="text"
-                    aria-label="vertical outlined primary button group"
-                  >
-                    <Button className={clsx(classes.moveBtn)}>
-                      <ArrowUpwardIcon className={clsx(classes.arrow)} />
-                    </Button>
-                    <Button className={clsx(classes.moveBtn)}>
-                      <ArrowDownwardIcon className={clsx(classes.arrow)} />
-                    </Button>
-                  </ButtonGroup>
-                </TableCell>
-                <TableCell className={classes.deleteIconBtnCell}>
-                  <IconButton
-                    className={classes.deleteIconBtn}
-                    aria-label="delete"
-                    title="Delete"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-                <TableCell>{row.bus}</TableCell>
-                <TableCell>{row.direction}</TableCell>
-                <TableCell>{row.stop}</TableCell>
-              </TableRow>
-            ))}
+            {bussesToTrack.map((_busToTrack, i) => {
+              const busToTrack = { ..._busToTrack };
+              const joinedStopRoutes = busToTrack.stopRoutes.join(", ");
+              busToTrack.stopRoutes = joinedStopRoutes;
+
+              return (
+                <TableRow key={busToTrack.id}>
+                  <TableCell className={classes.moveRowBtnsCell}>
+                    <ButtonGroup
+                      orientation="vertical"
+                      color="primary"
+                      variant="text"
+                      aria-label="vertical outlined primary button group"
+                    >
+                      <Button
+                        className={clsx(classes.moveBtn)}
+                        onClick={() => handleMove(i, "up")}
+                        disabled={i < 1}
+                      >
+                        <ArrowUpwardIcon className={clsx(classes.arrow)} />
+                      </Button>
+                      <Button
+                        className={clsx(classes.moveBtn)}
+                        onClick={() => handleMove(i, "down")}
+                        disabled={i > bussesToTrack.length - 2}
+                      >
+                        <ArrowDownwardIcon className={clsx(classes.arrow)} />
+                      </Button>
+                    </ButtonGroup>
+                  </TableCell>
+                  <TableCell className={classes.deleteIconBtnCell}>
+                    <IconButton
+                      className={classes.deleteIconBtn}
+                      aria-label="delete"
+                      title="Delete"
+                      onClick={() => handleDelete(busToTrack.id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                  {generateTds(busToTrack)}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

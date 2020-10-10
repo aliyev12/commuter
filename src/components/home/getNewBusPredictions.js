@@ -3,8 +3,9 @@ export const getNewBusPredictions = (busData) => {
 
   if (busData && busData.length && Array.isArray(busData)) {
     busData.forEach((item) => {
-      const { predictions, trackedBusInfo } = item;
+      const { id, predictions, trackedBusInfo } = item;
       const newPrediction = {
+        id,
         predictionExists: false,
         routeID: trackedBusInfo.routeID,
         minutes: 0,

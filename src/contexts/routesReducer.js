@@ -3,6 +3,8 @@ import {
   addDirectionsInfo,
   addStopsInfo,
   addNewBusToTrack,
+  updateBussesToTrack,
+  deleteBusToTrack,
   syncBussesToTrackFromLocalStorage,
 } from "./routesActions";
 
@@ -20,6 +22,12 @@ export function reducer(state, action) {
 
     case "ADD_NEW_BUS_TO_TRACK":
       return addNewBusToTrack(state, payload.newBusInfo);
+
+    case "UPDATE_BUSSES_TO_TRACK":
+      return updateBussesToTrack(state, payload.bussesToTrack);
+
+    case "DELETE_BUSS_TO_TRACK":
+      return deleteBusToTrack(state, payload.id);
 
     case "SYNC_BUSSES_TO_TRACK_FROM_LOCAL_STORAGE":
       return syncBussesToTrackFromLocalStorage(state);

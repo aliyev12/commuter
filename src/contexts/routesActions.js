@@ -1,3 +1,5 @@
+import uniqid from "uniqid";
+
 export const addRoutesInfo = (state, routesInfo) => ({ ...state, routesInfo });
 
 export const addDirectionsInfo = (state, directionsInfo) => ({
@@ -7,18 +9,43 @@ export const addDirectionsInfo = (state, directionsInfo) => ({
 
 export const addStopsInfo = (state, stopsInfo) => ({ ...state, stopsInfo });
 
+/*
+    directionName: "NORTH"
+    directionNum: "0"
+    routeID: "W4"
+    routeName: "W4 - ANACOSTIA STA - DEANWOOD STA"
+    stopID: "1000772"
+    stopName: "E CAPITOL ST SE + 47TH ST SE"
+    stopRoutes: (7) ["96", "96*1", "96*2", "U5", "U6", "W4", "W4*1"]
+    tripHeadsign: "DEANWOOD STATION"
+  */
+
 export const addNewBusToTrack = (state, newBusInfo) => {
   const newBussesToTrack = [...state.bussesToTrack];
-  // If stop ID already exists - do nothing
+  // If stop ID, routeID and direction already exists - do nothing
   const foundBusToTrack = newBussesToTrack.find(
-    (x) => x.stopID === newBusInfo.stopID
+    (x) =>
+      x.stopID === newBusInfo.stopID &&
+      x.routeID === newBusInfo.routeID &&
+      x.directionNum === newBusInfo.directionNum
   );
   if (foundBusToTrack) return { ...state };
 
-  newBussesToTrack.push(newBusInfo);
+  newBussesToTrack.push({ id: uniqid(), ...newBusInfo });
 
   writeNewBussesToTrackToLocalStorage(newBussesToTrack);
 
+  return { ...state, bussesToTrack: newBussesToTrack };
+};
+
+export const updateBussesToTrack = (state, bussesToTrack) => {
+  writeNewBussesToTrackToLocalStorage(bussesToTrack);
+  return { ...state, bussesToTrack };
+};
+
+export const deleteBusToTrack = (state, id) => {
+  const newBussesToTrack = [...state.bussesToTrack].filter((b) => b.id !== id);
+  writeNewBussesToTrackToLocalStorage(newBussesToTrack);
   return { ...state, bussesToTrack: newBussesToTrack };
 };
 

@@ -12,21 +12,33 @@ export const useStyles = makeStyles({
     width: "6px",
     padding: "0 3px",
   },
+  tripHeadsignCol: {
+    minWidth: "200px",
+  },
+  stopCol: {
+    minWidth: "300px",
+  },
+  routeNameCol: {
+    minWidth: "350px",
+  },
+  stopRoutesCol: {
+    minWidth: "200px",
+  },
   moveRowBtnsCell: {
-    width: "6px",
+    // width: "6px",
     padding: "0 3px",
   },
   deleteIconBtn: {
     color: red.A400,
     // padding: "3px",
   },
-  moveBtn: {
-    padding: "5px",
-    minWidth: "20px",
-  },
-  arrow: {
-    fontSize: "1rem",
-  },
+  // moveBtn: {
+  //   padding: "5px",
+  //   minWidth: "20px",
+  // },
+  // arrow: {
+  //   fontSize: "1rem",
+  // },
   addNewBtn: {
     marginTop: "2rem",
   },
