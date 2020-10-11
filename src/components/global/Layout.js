@@ -13,10 +13,12 @@ import EditIcon from "@material-ui/icons/Edit";
 import HomeIcon from "@material-ui/icons/Home";
 import AddIcon from "@material-ui/icons/Add";
 import MenuIcon from "@material-ui/icons/Menu";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import socketIOClient from "socket.io-client";
 import clsx from "clsx";
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,6 +40,8 @@ var socket;
 function Layout({ children }) {
   const classes = useStyles();
   const history = useHistory();
+  const location = useLocation();
+  const onLoginPage = location.pathname.split("/").includes("login");
 
   const [open, set__open] = React.useState(false);
 
@@ -72,6 +76,18 @@ function Layout({ children }) {
           </ListItemIcon>
           <ListItemText primary={"Add new item"} />
         </ListItem>
+        <ListItem button onClick={() => history.push("/login")}>
+          <ListItemIcon>
+            <PersonAddIcon />
+          </ListItemIcon>
+          <ListItemText primary={"Login"} />
+        </ListItem>
+        <ListItem button onClick={() => console.log("logging out...")}>
+          <ListItemIcon>
+            <ExitToAppIcon />
+          </ListItemIcon>
+          <ListItemText primary={"Logout"} />
+        </ListItem>
       </List>
     </div>
   );
@@ -94,7 +110,11 @@ function Layout({ children }) {
           <Typography variant="h6" className={classes.title}>
             Commuter
           </Typography>
-          <Button color="inherit">Login</Button>
+          {!onLoginPage && (
+            <Button color="inherit" onClick={() => history.push("/login")}>
+              Login
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
       <Drawer anchor={"left"} open={open} onClose={toggleDrawer(false)}>

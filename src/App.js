@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { EditList } from "./components/edit/EditList";
 import { Add } from "./components/add/Add";
 import { Home } from "./components/home/Home";
+import { Login } from "./components/auth/Login";
+import { Register } from "./components/auth/Register";
 import { Layout } from "./components/global/Layout";
 import { RoutesContext } from "./contexts/RoutesContext";
 
@@ -22,6 +24,12 @@ function App() {
           </Route>
           <Route path="/add">
             <Add />
+          </Route>
+          <Route path="/login">
+            <Login />
+          </Route>
+          <Route path="/register">
+            <Register />
           </Route>
           <Route path="/">
             <Home />
