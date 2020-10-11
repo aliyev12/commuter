@@ -28,4 +28,18 @@ export const useStyles = makeStyles((theme) => ({
   oAuthOrText: {
     marginTop: "30px",
   },
+  passwordFieldWrapper: {
+    position: "relative",
+  },
+  passwordField: {
+    width: "100%",
+    "& .MuiInput-input": {
+      paddingRight: "44px",
+    },
+  },
+  showHideBtn: {
+    position: "absolute",
+    right: 0,
+    top: 5,
+  },
 }));

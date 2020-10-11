@@ -23,7 +23,7 @@ export function Busses() {
   const { bussesToTrack } = routesState;
   const [busPredictions, set__busPredictions] = React.useState([]);
   const [lastUpdatedOn, set__lastUpdatedOn] = React.useState(Date.now());
-
+  console.log("bussesToTrack = ", bussesToTrack);
   React.useEffect(() => {
     socket.emit("realtimeBusInfo", bussesToTrack, handleBusPredictions);
 
