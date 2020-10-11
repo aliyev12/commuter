@@ -15,6 +15,8 @@ import { Title } from "../global/Title";
 import { NewBusInfo } from "./NewBusInfo";
 import { Search } from "./Search";
 import { useStyles } from "./Add.styles";
+import { SelectChoice } from "./SelectChoice";
+import { Alert } from "./Alert";
 
 const defaultInfo = {
   routeID: "",
@@ -27,6 +29,18 @@ const defaultInfo = {
   stopRoutes: [],
 };
 
+const noDirectionsAlert = {
+  title: "Directions",
+  body:
+    "Sorry, at this moment, no directions information has been provided by WMATA. Try changing type of results by clicking on one of the radio buttons below.",
+};
+
+const noStopsAlert = {
+  title: "Stops",
+  body:
+    "Sorry, at this moment, no stops information has been provided by WMATA. Try changing type of results by clicking on one of the radio buttons below.",
+};
+
 export function Add() {
   const classes = useStyles();
   const history = useHistory();
@@ -36,35 +50,53 @@ export function Add() {
   const [activeStep, setActiveStep] = React.useState(0);
 
   const [routeID, set__routeID] = React.useState(undefined);
-  const [routeInputValue, set__routeInputValue] = React.useState("");
-
+  const [routeIDInput, set__routeIDInput] = React.useState("");
   const [directionNum, set__directionNum] = React.useState(undefined);
+  const [directionNumInput, set__directionNumInput] = React.useState("");
   const [stopID, set__stopID] = React.useState(undefined);
+  const [stopIDInput, set__stopIDInput] = React.useState("");
 
   const [newBusInfo, set__newBusInfo] = React.useState({ ...defaultInfo });
+  const [resultsType, set__resultsType] = React.useState("complete"); // complete or current
+  const [showAlert, set__showAlert] = React.useState(false);
+  const [alertContent, set__alertContent] = React.useState({
+    title: "",
+    body: "",
+  });
 
   React.useEffect(() => {
-    socket.emit("getRoutes", (_routes) => {
-      console.log("routes = ", _routes);
+    socket.emit("getRoutes", resultsType, (_routes) => {
+      // console.log("routes = ", _routes);
       dispatch({ type: "ADD_ROUTES_INFO", payload: { routesInfo: _routes } });
     });
-  }, []);
+  }, [resultsType]);
 
   const handleNext = (step) => {
     if (step === "after-route" && routeID) {
-      socket.emit("getDirections", routeID, (_directions) => {
-        console.log("_directions = ", _directions);
-        dispatch({
-          type: "ADD_DIRECTIONS_INFO",
-          payload: { directionsInfo: _directions },
-        });
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      socket.emit("getDirections", resultsType, routeID, (_directions) => {
+        // console.log("_directions = ", _directions);
+
+        if (!_directions.length) {
+          set__alertContent(noDirectionsAlert);
+          set__showAlert(true);
+        } else {
+          dispatch({
+            type: "ADD_DIRECTIONS_INFO",
+            payload: { directionsInfo: _directions },
+          });
+          setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
       });
     } else if (step === "after-direction" && directionNum) {
-      socket.emit("getStops", routeID, directionNum, (_stops) => {
-        console.log("_stops = ", _stops);
-        dispatch({ type: "ADD_STOPS_INFO", payload: { stopsInfo: _stops } });
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      socket.emit("getStops", resultsType, routeID, directionNum, (_stops) => {
+        // console.log("_stops = ", _stops);
+        if (!_stops.length) {
+          set__alertContent(noStopsAlert);
+          set__showAlert(true);
+        } else {
+          dispatch({ type: "ADD_STOPS_INFO", payload: { stopsInfo: _stops } });
+          setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
       });
     } else if (step === "after-stop" && stopID) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -76,76 +108,36 @@ export function Add() {
     set__routeID(undefined);
     set__directionNum(undefined);
     set__stopID(undefined);
+    set__routeIDInput("");
+    set__directionNumInput("");
+    set__stopIDInput("");
     set__newBusInfo({ ...defaultInfo });
   };
 
   const handleAdd = () => {
-    // do some
     dispatch({ type: "ADD_NEW_BUS_TO_TRACK", payload: { newBusInfo } });
     handleReset();
     history.push("/");
   };
 
-  const handleRouteChange = (_, choice) => {
-    if (choice && choice.value && choice.name) {
-      const foundRoute = routesInfo.find((x) => x.routeID === choice.value);
-      set__routeID(choice.value);
-      set__newBusInfo({
-        ...newBusInfo,
-        ...foundRoute,
-      });
-    } else {
-      set__routeID(undefined);
-      set__newBusInfo({
-        ...newBusInfo,
-        routeID: "",
-        routeName: "",
-      });
+  const handleChange = ({ choice, resetProps, items, idProp, setter }) => {
+    let newVal = undefined;
+    let foundItem = { ...resetProps };
+    if (choice && choice.value) {
+      foundItem = items.find((x) => x[idProp] === choice.value);
+      newVal = choice.value;
     }
+    setter(newVal);
+    set__newBusInfo({
+      ...newBusInfo,
+      ...foundItem,
+    });
   };
 
-  const handleRouteInputChange = (_, newInput) => {
-    set__routeInputValue(newInput);
-  };
-
-  const handleDirectionChange = (_, choice) => {
-    if (choice && choice.value && choice.name) {
-      const foundDirection = directionsInfo.find(
-        (x) => x.directionNum === choice.value
-      );
-      set__directionNum(choice.value);
-      set__newBusInfo({
-        ...newBusInfo,
-        ...foundDirection,
-      });
-    } else {
-      set__directionNum(undefined);
-      set__newBusInfo({
-        ...newBusInfo,
-        directionName: "",
-        directionNum: "",
-        tripHeadsign: "",
-      });
-    }
-  };
-
-  const handleStopChange = (_, choice) => {
-    if (choice && choice.value && choice.name) {
-      const foundStop = stopsInfo.find((x) => x.stopID === choice.value);
-      set__stopID(choice.value);
-      set__newBusInfo({
-        ...newBusInfo,
-        ...foundStop,
-      });
-    } else {
-      set__stopID(undefined);
-      set__newBusInfo({
-        ...newBusInfo,
-        stopID: "",
-        stopName: "",
-        stopRoutes: [],
-      });
-    }
+  const handleResultsTypeChange = (event) => {
+    handleReset();
+    const newResultsType = event.target.value;
+    set__resultsType(newResultsType);
   };
 
   return (
@@ -185,9 +177,17 @@ export function Add() {
                         value: x.routeID,
                       }))}
                       value={routeID}
-                      inputValue={routeInputValue}
-                      handleChange={handleRouteChange}
-                      handleInputChange={handleRouteInputChange}
+                      inputValue={routeIDInput}
+                      handleInputChange={(_, v) => set__routeIDInput(v)}
+                      handleChange={(_, c) =>
+                        handleChange({
+                          choice: c,
+                          resetProps: { routeID: "", routeName: "" },
+                          items: routesInfo,
+                          idProp: "routeID",
+                          setter: set__routeID,
+                        })
+                      }
                     />
                   ) : null}
                 </Typography>
@@ -219,7 +219,21 @@ export function Add() {
                         value: x.directionNum,
                       }))}
                       value={directionNum}
-                      handleChange={handleDirectionChange}
+                      inputValue={directionNumInput}
+                      handleInputChange={(_, v) => set__directionNumInput(v)}
+                      handleChange={(_, c) =>
+                        handleChange({
+                          choice: c,
+                          resetProps: {
+                            directionName: "",
+                            directionNum: "",
+                            tripHeadsign: "",
+                          },
+                          items: directionsInfo,
+                          idProp: "directionNum",
+                          setter: set__directionNum,
+                        })
+                      }
                     />
                   ) : null}
                 </Typography>
@@ -250,7 +264,21 @@ export function Add() {
                         value: x.stopID,
                       }))}
                       value={stopID}
-                      handleChange={handleStopChange}
+                      inputValue={stopIDInput}
+                      handleInputChange={(_, v) => set__stopIDInput(v)}
+                      handleChange={(_, c) =>
+                        handleChange({
+                          choice: c,
+                          resetProps: {
+                            stopID: "",
+                            stopName: "",
+                            stopRoutes: [],
+                          },
+                          items: stopsInfo,
+                          idProp: "stopID",
+                          setter: set__stopID,
+                        })
+                      }
                     />
                   ) : null}
                 </Typography>
@@ -285,13 +313,22 @@ export function Add() {
             </Button>
           </Paper>
         )}
+
+        <SelectChoice
+          searchType={resultsType}
+          handlesearchTypeChange={handleResultsTypeChange}
+        />
       </div>
+      <Alert
+        showAlert={showAlert}
+        alertContent={alertContent}
+        handleAlertOpen={() => set__showAlert(true)}
+        handleAlertClose={() => set__showAlert(false)}
+        handleOkClick={() => {
+          set__showAlert(false);
+          handleReset();
+        }}
+      />
     </Container>
   );
 }
-
-// const [newBusInfo, set__newBusInfo] = React.useState({
-//   bus: "17H",
-//   direction: "North",
-//   stop: "Gainsborough Dr + Eastlake Dr + Bet # 5317",
-// });

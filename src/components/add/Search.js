@@ -13,9 +13,9 @@ export function Search({
   label = "Bus number",
   options = [],
   value,
-  // inputValue,
+  inputValue,
   handleChange,
-  // handleInputChange,
+  handleInputChange,
 }) {
   const classes = useStyles();
 
@@ -33,9 +33,9 @@ export function Search({
         //   return option.name === value.name;
         // }}
         value={value}
-        // inputValue={inputValue}
+        inputValue={inputValue}
         onChange={handleChange}
-        // onInputChange={handleInputChange}
+        onInputChange={handleInputChange}
         renderInput={(params) => (
           <TextField {...params} label={label} variant="outlined" />
         )}
